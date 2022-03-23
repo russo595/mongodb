@@ -1,1 +1,1 @@
-# Тестовый проект использования mongo reactive
+# Тестовый проект mongo reactive
