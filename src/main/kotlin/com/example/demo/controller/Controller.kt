@@ -2,18 +2,28 @@ package com.example.demo.controller
 
 import com.example.demo.config.Props
 import com.example.demo.model.Account
+import com.example.demo.model.Book
 import com.example.demo.repository.AccountRepository
 import com.example.demo.repository.AccountRepositoryReactive
+import com.example.demo.repository.BookRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.*
 import kotlin.random.Random
 
 @RestController
-class Controller(val repository: AccountRepositoryReactive, val simpleRepository: AccountRepository, val pros: Props) {
+class Controller(
+    private val repository: AccountRepositoryReactive,
+    private val simpleRepository: AccountRepository,
+    private val pros: Props,
+    private val bookRepository: BookRepository,
+) {
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
@@ -42,6 +52,20 @@ class Controller(val repository: AccountRepositoryReactive, val simpleRepository
             mutableListOf.iterator()
         })
         return repository.saveAll(fromIterable)
+    }
+
+    @GetMapping("/saveone")
+    @Transactional
+    fun saveOne(): Account {
+//        val save = simpleRepository.save(Account(owner = "Rus2").apply { book = Book(name = "BookName2") })
+        val save = simpleRepository.save(Account(owner = "Rus2").apply { book = bookRepository.save(Book(name = "BookName2")) })
+        return save
+    }
+
+    @GetMapping("/find/{id}")
+    @Transactional
+    fun findById(@PathVariable id: String): Account? {
+        return simpleRepository.findByIdOrNull(id)
     }
 
     @GetMapping("/random2")
