@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.Instant
 import kotlin.random.Random
 
 @Document(value = "account")
@@ -14,7 +15,8 @@ data class Account(
     val id: String? = null,
     @Indexed
     val owner: String,
-    var value: BigDecimal = BigDecimal(Random.nextDouble(1.0, 1000.0)).setScale(2, RoundingMode.HALF_UP)
+    var value: BigDecimal = BigDecimal(Random.nextDouble(1.0, 1000.0)).setScale(2, RoundingMode.HALF_UP),
+    var date: Instant = Instant.now(),
 ) {
     @DBRef
     var book: Book? = null

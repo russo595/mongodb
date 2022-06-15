@@ -6,6 +6,7 @@ import com.example.demo.model.Book
 import com.example.demo.repository.AccountRepository
 import com.example.demo.repository.AccountRepositoryReactive
 import com.example.demo.repository.BookRepository
+import org.springframework.data.querydsl.binding.QuerydslPredicate
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,8 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.*
+import java.util.function.Predicate
 import kotlin.random.Random
+
 
 @RestController
 class Controller(
@@ -58,7 +60,9 @@ class Controller(
     @Transactional
     fun saveOne(): Account {
 //        val save = simpleRepository.save(Account(owner = "Rus2").apply { book = Book(name = "BookName2") })
-        val save = simpleRepository.save(Account(owner = "Rus2").apply { book = bookRepository.save(Book(name = "BookName2")) })
+        val save = simpleRepository.save(Account(owner = "Rus2").apply {
+            book = bookRepository.save(Book(name = "BookName2"))
+        })
         return save
     }
 
@@ -83,5 +87,10 @@ class Controller(
         }
 
         return simpleRepository.saveAll(mutableListOf)
+    }
+
+    @GetMapping("/search/query")
+    fun query(@QuerydslPredicate(root = Account::class) predicate: Predicate<Account>): List<Account> {
+        return simpleRepository.findAll()
     }
 }

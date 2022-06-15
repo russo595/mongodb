@@ -14,6 +14,11 @@ import org.bson.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneOffset
+import java.util.concurrent.ThreadLocalRandom
 
 @ChangeLog(order = "001")
 class DatabaseChangeLog {
@@ -63,5 +68,22 @@ class DatabaseChangeLog {
         val find: MutableList<Account> =
             mongoTemplate.find(Query.query(Criteria.where("value").lte(1000)), Account::class.java)
         find.forEach { println(it) }
+    }
+
+    @ChangeSet(order = "009", id = "014", author = "Rustem Sabitov", runAlways = false)
+    fun init9(mongoTemplate: MongockTemplate) {
+
+        val d1 = LocalDate.of(2022, 5, 14).toEpochSecond(LocalTime.MIN, ZoneOffset.UTC)
+        val d2 = LocalDate.of(2020, 5, 14).toEpochSecond(LocalTime.MAX, ZoneOffset.UTC)
+        val i1: Instant = Instant.ofEpochSecond(d1)
+        val i2: Instant = Instant.ofEpochSecond(d2)
+
+        mongoTemplate.findAll(Account::class.java)
+            .forEach {
+                mongoTemplate.save(it.apply {
+                    it.date =
+                        Instant.ofEpochMilli(ThreadLocalRandom.current().nextLong(i2.toEpochMilli(), i1.toEpochMilli()))
+                })
+            }
     }
 }
